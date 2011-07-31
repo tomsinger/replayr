@@ -1,0 +1,7 @@
+Simple replay of apache log files, bodged together from little bits of python and held together with sticky tape.
+
+Currently full of @todo's, needs a refactor to clean it up and probably bugs as well but surprisingly it actually works!
+
+Licensed under The MIT License, see LICENSE file for details
+
+Documentation is in the github wiki at https://github.com/tomsinger/edbar/wiki

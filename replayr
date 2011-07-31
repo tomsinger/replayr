@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+
+import threading
+import datetime
+import time
+import re
+from datetime import date
+import urllib2
+import socket
+# set default socket timeout to 20s as unable to set timeout on urlopen in python 2.4.3
+socket.setdefaulttimeout(20)
+        
+class ThreadClass(threading.Thread):
+  def run(self):
+    while len(loglines) > 0:
+      processline = loglines.pop()
+      linetime = re.search(dateregexstring, processline)
+      pathmatch = re.search(urlregexstring, processline)
+
+      # Check for pathmatch, if none possible POST/HEAD so ignore for now
+      # @todo match HEAD as well as GET, still ignore POST
+      if pathmatch:
+        fullpath = pathmatch.group()
+        # remove 'GET ' from path
+        path = fullpath[4:len(fullpath)]
+
+        if linetime:
+          offset = time.mktime(time.strptime(linetime.group(), '%d/%b/%Y:%H:%M:%S')) - time.mktime(time.strptime(starttime.group(), '%d/%b/%Y:%H:%M:%S'))
+
+          timerunning = time.time() - time.mktime(startedat)
+
+          if offset > timerunning:
+            # The request doesn't have to be made yet so sleep until it needs to be
+            print '%s Having a nap for %ss' %(self.getName(), offset-timerunning)
+            time.sleep(offset-timerunning)
+            timerunninglog = time.time() - time.mktime(startedat)
+            print '%s Processing %s [%s] %ss in, should run at %ss in' %(self.getName(), linetime.group(), path, timerunninglog, offset)
+          else:
+            # The request needs to run now, there is a chance it may be behind as well
+            # @todo Only report behind if more than 500ms behind
+            timerunninglog = time.time() - time.mktime(startedat)
+            print '%s Behind processing %s [%s] %ss in, should run at %ss in' %(self.getName(), linetime.group(), path, timerunninglog, offset)
+
+          # Catch 404 errors and ignore as these are fine and part of the running process
+          try:
+            urllib2.urlopen('http://'+domain+path)
+          except Exception:
+            print 'Caught HTTPError'
+        else:
+          print 'Unable to determine linetime from %s' %(processline)
+      else:
+	    print 'No pathmatch for %s' %(processline)
+
+
+dateregexstring = '\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2}'
+urlregexstring = 'GET [^\s]*'
+# @todo move domain into config file or cli parameter
+domain = 'www.example.com'
+
+# @todo move logfile into config file or cli parameter
+logfile = open('/nfs/personaldev/tsinger/download/web/access.2011-07-26-10-11.log')
+loglines = logfile.readlines()
+logfile.close()
+
+starttime = re.search(dateregexstring, loglines[0])
+
+# @todo throw exception if no starttime
+if starttime:
+    print 'Start Time: ', starttime.group()
+else:
+    print 'No start time'
+
+endtime = re.search(dateregexstring, loglines[len(loglines)-1])
+
+# @todo throw exception if no endtime
+if endtime:
+    print 'End Time: ', endtime.group()
+else:
+    print 'No end time'
+
+timediff = time.mktime(time.strptime(endtime.group(), '%d/%b/%Y:%H:%M:%S')) - time.mktime(time.strptime(starttime.group(), '%d/%b/%Y:%H:%M:%S'))
+
+print 'Processing %s lines (%ss) of logfiles' %(len(loglines), timediff)
+
+loglines.reverse()
+
+startedat = time.localtime()
+
+# @todo move number of threads into config file or cli parameter 
+for i in range(15):
+  t = ThreadClass()
+  t.start()
