@@ -2,6 +2,12 @@ Simple replay of apache log files, bodged together from little bits of python an
 
 Currently full of @todo's, needs a refactor to clean it up and probably bugs as well but surprisingly it actually works!
 
+More @todo's as we use the script:
+1. Sort the wiki out!
+2. Allow custom throttling to increase the speed by a factor of x
+3. Allow complete removal of throttling to allow the script to run as fast as possible
+4. Stats, stats and more stats!
+
 Name from a combination of myself and https://github.com/robyoung so don't just blame me!
 
 Licensed under The MIT License, see LICENSE file for details
