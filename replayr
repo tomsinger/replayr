@@ -31,7 +31,7 @@ class ThreadClass(threading.Thread):
 
           if offset > timerunning:
             # The request doesn't have to be made yet so sleep until it needs to be
-            print '%s Having a nap for %ss' %(self.getName(), offset-timerunning)
+            print '%s Having a siesta for %ss' %(self.getName(), offset-timerunning)
             time.sleep(offset-timerunning)
             timerunninglog = time.time() - time.mktime(startedat)
             print '%s Processing %s [%s] %ss in, should run at %ss in' %(self.getName(), linetime.group(), path, timerunninglog, offset)
