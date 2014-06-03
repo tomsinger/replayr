@@ -44,8 +44,8 @@ class ThreadClass(threading.Thread):
           # Catch 404 errors and ignore as these are fine and part of the running process
           try:
             urllib2.urlopen('http://'+domain+path)
-          except Exception:
-            print 'Caught HTTPError'
+          except Exception, e:
+            print e
         else:
           print 'Unable to determine linetime from %s' %(processline)
       else:
